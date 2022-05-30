@@ -9,6 +9,7 @@ using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using TransientScopedSingleton.Models;
+using TransientScopedSingleton.Services;
 
 namespace TransientScopedSingleton.Controllers
 {
@@ -22,6 +23,7 @@ namespace TransientScopedSingleton.Controllers
         private readonly ISingletonService _singletonService1;
         private readonly ISingletonService _singletonService2;
         private readonly UserManager<IdentityUser> _userManager;
+        private readonly ICookieService _cookieService;
 
         public HomeController(ILogger<HomeController> logger,
             ITransientService transientService1,
@@ -30,7 +32,8 @@ namespace TransientScopedSingleton.Controllers
             IScopedService scopedService2,
             ISingletonService singletonService1,
             ISingletonService singletonService2,
-            UserManager<IdentityUser> userManager)
+            UserManager<IdentityUser> userManager,
+            ICookieService cookieService)
         {
             _logger = logger;
             _transientService1 = transientService1;
@@ -40,6 +43,7 @@ namespace TransientScopedSingleton.Controllers
             _singletonService1 = singletonService1;
             _singletonService2 = singletonService2;
             _userManager = userManager;
+            _cookieService = cookieService;
         }
 
         public async Task<IActionResult> Index()
@@ -63,11 +67,33 @@ namespace TransientScopedSingleton.Controllers
             Set("kay", "Hello from cookie", 10);
             Remove("Key");
 
-            TempData["SessionID"] = HttpContext.Session.Id;
+            TempData["SessionID"] = HttpContext.Session.Id;      
 
-            
+
 
             HttpContext.Session.Set("mitsos", new byte[0]);
+            
+
+
+            if (HttpContext.Request.Cookies.ContainsKey("koukou"))
+            {
+                var koukou = HttpContext.Request.Cookies["koukou"];
+                Debug.WriteLine(koukou);
+            }
+            else
+            {
+                _cookieService.CreateCookie("koukou", "koukou");
+            }
+
+
+            //var a = HttpContext.Response.Cookies.ToString();
+
+            //TempData["UserCookies"] = a;
+
+            //HttpContext.Request.Cookies.Keys
+
+
+           // TempData["Cookies"] = _cookieService.GetCookies();
 
             TempData["UserId"] = userId;
             TempData["UserName"] = userName;

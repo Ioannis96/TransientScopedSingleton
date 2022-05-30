@@ -14,6 +14,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using TransientScopedSingleton.Data;
+using TransientScopedSingleton.Services;
 
 namespace TransientScopedSingleton
 {
@@ -36,6 +37,9 @@ namespace TransientScopedSingleton
                 .AddEntityFrameworkStores<ApplicationDbContext>();
 
             services.AddTransient<ITransientService, OperationService>();
+            services.AddSingleton<ICookieService, CookieService>();
+
+
             services.AddScoped<IScopedService, OperationService>();
             services.AddSingleton<ISingletonService, OperationService>();
             services.AddSession(options =>
