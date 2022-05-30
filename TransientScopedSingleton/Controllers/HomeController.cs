@@ -1,9 +1,11 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using TransientScopedSingleton.Models;
 
@@ -18,6 +20,7 @@ namespace TransientScopedSingleton.Controllers
         private readonly IScopedService _scopedService2;
         private readonly ISingletonService _singletonService1;
         private readonly ISingletonService _singletonService2;
+        private readonly UserManager<IdentityUser> _userManager;
 
         public HomeController(ILogger<HomeController> logger,
             ITransientService transientService1,
@@ -25,7 +28,8 @@ namespace TransientScopedSingleton.Controllers
             IScopedService scopedService1,
             IScopedService scopedService2,
             ISingletonService singletonService1,
-            ISingletonService singletonService2)
+            ISingletonService singletonService2,
+            UserManager<IdentityUser> userManager)
         {
             _logger = logger;
             _transientService1 = transientService1;
@@ -34,9 +38,10 @@ namespace TransientScopedSingleton.Controllers
             _scopedService2 = scopedService2;
             _singletonService1 = singletonService1;
             _singletonService2 = singletonService2;
+            _userManager = userManager;
         }
 
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
             ViewBag.transient1 = _transientService1.GetOperationID().ToString();
             ViewBag.transient2 = _transientService2.GetOperationID().ToString();
@@ -45,7 +50,20 @@ namespace TransientScopedSingleton.Controllers
             ViewBag.singleton1 = _singletonService1.GetOperationID().ToString();
             ViewBag.singleton2 = _singletonService2.GetOperationID().ToString();
 
+
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier); // will give the user's userId
+            var userName = User.FindFirstValue(ClaimTypes.Name); // will give the user's userName
+
+            IdentityUser identityUser = await _userManager.GetUserAsync(User);
+            string userEmail = identityUser?.Email; // will give the user's Email
+
             TempData["SessionID"] = HttpContext.Session.Id;
+            HttpContext.Session.Set("mitsos", new byte[0]);
+
+            TempData["UserId"] = userId;
+            TempData["UserName"] = userName;
+            TempData["UserEmail"] = userEmail;
+
 
             return View();
         }
