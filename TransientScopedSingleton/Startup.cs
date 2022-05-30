@@ -36,6 +36,13 @@ namespace TransientScopedSingleton
             services.AddTransient<ITransientService, OperationService>();
             services.AddScoped<IScopedService, OperationService>();
             services.AddSingleton<ISingletonService, OperationService>();
+            services.AddSession(options =>
+            {
+                options.Cookie.Name = ".AdventureWorks.Session";
+                options.IdleTimeout = TimeSpan.FromSeconds(10);
+                options.Cookie.HttpOnly = true;
+                options.Cookie.IsEssential = true;
+            });
 
             services.AddControllersWithViews();
             services.AddRazorPages();
@@ -59,6 +66,8 @@ namespace TransientScopedSingleton
             app.UseStaticFiles();
 
             app.UseRouting();
+
+            app.UseSession();
 
             app.UseAuthentication();
             app.UseAuthorization();

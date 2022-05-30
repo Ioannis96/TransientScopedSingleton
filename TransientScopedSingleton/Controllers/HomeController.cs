@@ -44,6 +44,9 @@ namespace TransientScopedSingleton.Controllers
             ViewBag.scoped2 = _scopedService2.GetOperationID().ToString();
             ViewBag.singleton1 = _singletonService1.GetOperationID().ToString();
             ViewBag.singleton2 = _singletonService2.GetOperationID().ToString();
+
+            TempData["SessionID"] = HttpContext.Session.Id;
+
             return View();
         }
 
