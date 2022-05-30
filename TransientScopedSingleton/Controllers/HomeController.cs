@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using System;
@@ -57,7 +58,15 @@ namespace TransientScopedSingleton.Controllers
             IdentityUser identityUser = await _userManager.GetUserAsync(User);
             string userEmail = identityUser?.Email; // will give the user's Email
 
+
+            string cookieValueFromReq = Request.Cookies["Key"];
+            Set("kay", "Hello from cookie", 10);
+            Remove("Key");
+
             TempData["SessionID"] = HttpContext.Session.Id;
+
+            
+
             HttpContext.Session.Set("mitsos", new byte[0]);
 
             TempData["UserId"] = userId;
@@ -66,6 +75,20 @@ namespace TransientScopedSingleton.Controllers
 
 
             return View();
+        }
+
+        public void Set(string key, string value, int? expireTime)
+        {
+            CookieOptions option = new CookieOptions();
+            if (expireTime.HasValue)
+                option.Expires = DateTime.Now.AddMinutes(expireTime.Value);
+            else
+                option.Expires = DateTime.Now.AddMilliseconds(10);
+            Response.Cookies.Append(key, value, option);
+        }
+        public void Remove(string key)
+        {
+            Response.Cookies.Delete(key);
         }
 
         public IActionResult Privacy()
